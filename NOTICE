@@ -1,0 +1,38 @@
+ComfyUI-NVIDIA-CMD
+Copyright 2026 ComfyUI-NVIDIA-CMD contributors
+
+This repository contains original ComfyUI adapter code licensed under
+Apache License 2.0.
+
+It is designed to call, but not vendor, the official NVIDIA CMD
+implementation and checkpoints.
+
+Built on NVIDIA Cosmos
+
+Official CMD code and released student/teacher weights
+-------------------------------------------------------
+Source: https://github.com/nv-tlabs/cmd
+Weights: https://huggingface.co/nvidia/cmd
+License: NVIDIA OneWay Noncommercial License
+https://github.com/nv-tlabs/cmd/blob/main/LICENSE
+
+Use of the official Work is limited to non-commercial research or
+educational purposes. Do not copy official CMD sources into this tree.
+
+NVIDIA Cosmos-Predict2.5 and Cosmos-Reason1
+-------------------------------------------
+Source: https://github.com/nvidia-cosmos/cosmos-predict2.5
+Weights: https://huggingface.co/nvidia/Cosmos-Predict2.5-2B
+         https://huggingface.co/nvidia/Cosmos-Reason1-7B
+License: NVIDIA Open Model License
+Licensed by NVIDIA Corporation under the NVIDIA Open Model License
+
+Self-Forcing
+------------
+Source: https://github.com/guandeh17/Self-Forcing
+License: Apache License 2.0
+
+Wan2.1
+------
+Source: https://github.com/Wan-Video/Wan2.1
+License: Apache License 2.0

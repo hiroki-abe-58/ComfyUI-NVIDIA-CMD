@@ -1,0 +1,5 @@
+label,gpu,used_mib,total_mib
+idle,NVIDIA GeForce RTX 5090,12212,32607
+loaded,NVIDIA GeForce RTX 5090,32103,32607
+after,NVIDIA GeForce RTX 5090,610,32607
+idle,NVIDIA GeForce RTX 5090,584,32607

@@ -1,0 +1,5 @@
+{"label": "idle", "gpu": "NVIDIA GeForce RTX 5090", "used_mib": 584, "total_mib": 32607, "source": "nvidia-smi"}
+{"label": "loaded", "gpu": "NVIDIA GeForce RTX 5090", "used_mib": 4188, "total_mib": 32607, "source": "torch.cuda.memory_allocated after BALANCED load"}
+{"label": "peak", "gpu": "NVIDIA GeForce RTX 5090", "used_mib": 22709, "total_mib": 32607, "source": "torch.cuda.max_memory_allocated 8-frame I2V"}
+{"label": "vae_decode", "gpu": "NVIDIA GeForce RTX 5090", "used_mib": 22709, "total_mib": 32607, "source": "included in peak; VAE stays on GPU in BALANCED"}
+{"label": "after", "gpu": "NVIDIA GeForce RTX 5090", "used_mib": 610, "total_mib": 32607, "source": "nvidia-smi after process exit"}

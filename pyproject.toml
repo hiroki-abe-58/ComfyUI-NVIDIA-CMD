@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "comfyui-nvidia-cmd"
+version = "0.1.0"
+description = "ComfyUI custom nodes for NVIDIA CMD causal image-to-video on Windows Native"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "ComfyUI-NVIDIA-CMD contributors"},
+]
+dependencies = [
+    "huggingface_hub>=0.36.0",
+    "safetensors>=0.4.5",
+    "einops>=0.8.1",
+    "omegaconf>=2.3.0",
+    "opencv-python-headless>=4.11.0.86",
+    "pillow>=11.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["nvidia_cmd"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--import-mode=importlib --ignore=__init__.py"
+python_files = ["test_*.py"]
+norecursedirs = [".venv", "third_party", "models", "outputs"]

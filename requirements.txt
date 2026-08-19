@@ -1,0 +1,6 @@
+huggingface_hub>=0.36.0
+safetensors>=0.4.5
+einops>=0.8.1
+omegaconf>=2.3.0
+opencv-python-headless>=4.11.0.86
+pillow>=11.0.0
