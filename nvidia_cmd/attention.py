@@ -25,24 +25,6 @@ def resolve_backend(requested: str) -> AttentionBackend:
     return value  # type: ignore[return-value]
 
 
-def disable_torch_compile() -> None:
-    """Skip torch.compile. Official causal_model compiles FlexAttention at import."""
-    os.environ["TORCHDYNAMO_DISABLE"] = "1"
-    os.environ["TORCH_COMPILE_DISABLE"] = "1"
-    import torch
-
-    if getattr(torch.compile, "_cmd_disabled", False):
-        return
-
-    def _identity(fn=None, *args, **kwargs):
-        if fn is None:
-            return lambda inner: inner
-        return fn
-
-    _identity._cmd_disabled = True  # type: ignore[attr-defined]
-    torch.compile = _identity  # type: ignore[assignment]
-
-
 def force_sdpa() -> None:
     """Force official cosmos.runtime to skip Transformer Engine and use SDPA."""
     os.environ["CMD_ATTENTION_BACKEND"] = "sdpa"

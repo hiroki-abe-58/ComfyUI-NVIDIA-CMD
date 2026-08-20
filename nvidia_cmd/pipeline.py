@@ -46,10 +46,30 @@ def generate_video(
     """Return uint8 frames as [T, H, W, C]."""
     import torch
 
-    torch.set_grad_enabled(False)
-
     if not prompt.strip():
         raise ValueError("Prompt is empty.")
+
+    with torch.inference_mode():
+        return _generate_video_inner(
+            loaded,
+            image=image,
+            prompt=prompt,
+            seed=seed,
+            camera_path=camera_path,
+            num_output_frames=num_output_frames,
+        )
+
+
+def _generate_video_inner(
+    loaded: LoadedCMD,
+    *,
+    image,
+    prompt: str,
+    seed: int,
+    camera_path: str | Path | None,
+    num_output_frames: int | None,
+) -> np.ndarray:
+    import torch
 
     torch.manual_seed(seed)
     if torch.cuda.is_available():

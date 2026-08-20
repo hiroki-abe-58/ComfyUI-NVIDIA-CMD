@@ -41,7 +41,6 @@ def main() -> int:
     backend = resolve_backend(args.attention)
     import torch
 
-    torch.set_grad_enabled(False)
     print(f"CMD attention backend={backend}")
 
     prompt = args.prompt
@@ -52,26 +51,27 @@ def main() -> int:
         raise SystemExit("Prompt is empty. Pass --prompt or --prompt-file.")
 
     image = Image.open(args.image).convert("RGB")
-    loaded = load_cmd_pipeline(
-        checkpoint=args.checkpoint,
-        checkpoint_path=args.checkpoint_path or None,
-        dtype="bfloat16",
-        device=args.device,
-        attention_backend=args.attention,
-        memory_preset=args.memory_preset,
-        model_root=args.model_root or None,
-    )
-    print(f"Loaded {loaded.checkpoint_path} attention={loaded.attention_backend}", flush=True)
-    print("CMD: starting generation", flush=True)
-    frames = generate_video(
-        loaded,
-        image=image,
-        prompt=prompt,
-        seed=args.seed,
-        camera_path=args.camera_path or None,
-        num_output_frames=args.num_output_frames,
-    )
-    output = write_mp4(frames, args.output, fps=FPS)
+    with torch.inference_mode():
+        loaded = load_cmd_pipeline(
+            checkpoint=args.checkpoint,
+            checkpoint_path=args.checkpoint_path or None,
+            dtype="bfloat16",
+            device=args.device,
+            attention_backend=args.attention,
+            memory_preset=args.memory_preset,
+            model_root=args.model_root or None,
+        )
+        print(f"Loaded {loaded.checkpoint_path} attention={loaded.attention_backend}", flush=True)
+        print("CMD: starting generation", flush=True)
+        frames = generate_video(
+            loaded,
+            image=image,
+            prompt=prompt,
+            seed=args.seed,
+            camera_path=args.camera_path or None,
+            num_output_frames=args.num_output_frames,
+        )
+        output = write_mp4(frames, args.output, fps=FPS)
     print(f"Wrote {output} frames={len(frames)} backend={loaded.attention_backend}")
     return 0
 

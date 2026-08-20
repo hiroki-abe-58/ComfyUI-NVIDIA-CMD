@@ -4,9 +4,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from .attention import AttentionBackend, disable_torch_compile, force_sdpa, resolve_backend
+from .attention import AttentionBackend, force_sdpa, resolve_backend
 from .paths import default_model_root, resolve_file
 from .presets import CHECKPOINT_PRESETS, CheckpointPreset, MemoryPreset
+from .runtime_guard import scoped_cmd_construction
 from .upstream import ensure_official_cmd_on_path, find_official_cmd_root
 
 _COSMOS_CHECKPOINT_OPTIONAL_BUFFERS = {
@@ -63,48 +64,6 @@ def _resolve_local_component(search_dirs: list[Path], names: list[str]) -> Path 
             if marker.is_file():
                 return directory.resolve()
     return None
-
-
-def force_text_encoder_cpu() -> None:
-    """Keep Reason1 on CPU. Transformers may otherwise dispatch 7B onto CUDA."""
-    from transformers import Qwen2_5_VLForConditionalGeneration
-
-    original = Qwen2_5_VLForConditionalGeneration.from_pretrained
-
-    @classmethod
-    def wrapped(cls, *args, **kwargs):
-        kwargs["device_map"] = "cpu"
-        kwargs["low_cpu_mem_usage"] = True
-        raw = original.__func__ if hasattr(original, "__func__") else original
-        return raw(cls, *args, **kwargs)
-
-    Qwen2_5_VLForConditionalGeneration.from_pretrained = wrapped
-
-
-def install_local_hf_hub(model_root: Path) -> None:
-    """Resolve VAE / base files from models/nvidia_cmd before Hugging Face."""
-    import huggingface_hub
-
-    original = huggingface_hub.hf_hub_download
-
-    def wrapped(repo_id: str, filename: str, *args, **kwargs):
-        for candidate in (
-            Path(repo_id) / filename,
-            model_root / "vae" / filename,
-            model_root / filename,
-            Path(filename),
-        ):
-            if candidate.is_file():
-                return str(candidate.resolve())
-        return original(repo_id, filename, *args, **kwargs)
-
-    huggingface_hub.hf_hub_download = wrapped
-    try:
-        import cosmos.wrapper as cosmos_wrapper
-
-        cosmos_wrapper.hf_hub_download = wrapped
-    except Exception:
-        pass
 
 
 def apply_local_asset_overrides(config: Any, model_root: Path) -> None:
@@ -261,16 +220,8 @@ def load_cmd_pipeline(
     upstream_root = find_official_cmd_root()
     ensure_official_cmd_on_path(upstream_root)
     search_root = Path(model_root) if model_root else default_model_root()
-    install_local_hf_hub(search_root)
 
     import torch
-
-    torch.set_grad_enabled(False)
-    disable_torch_compile()
-    force_text_encoder_cpu()
-    print("CMD: official repo ready, loading CausalInferencePipeline", flush=True)
-
-    from pipeline.causal_inference import CausalInferencePipeline
 
     from .memory import apply_preset, empty_cache, install_capped_kv_cache
 
@@ -286,29 +237,39 @@ def load_cmd_pipeline(
     config = load_config(preset, upstream_root)
     apply_local_asset_overrides(config, search_root)
     require_local_inference_assets(config, search_root)
-    if backend == "sdpa":
-        force_sdpa()
-        print("CMD: attention backend=sdpa", flush=True)
-    install_local_hf_hub(search_root)
-    install_student_direct_load(ckpt)
-    print(f"CMD: constructing pipeline from {ckpt.name}", flush=True)
-    pipeline = CausalInferencePipeline(config, device=device)
-    install_capped_kv_cache(pipeline, preset.local_attn_size)
-    pipeline.text_encoder.to("cpu")
-    te_devices = {str(param.device) for param in pipeline.text_encoder.parameters()}
-    print(f"CMD: text encoder devices={sorted(te_devices)}", flush=True)
-    empty_cache()
-    print("CMD: loading student weights", flush=True)
-    load_generator_checkpoint(pipeline, ckpt)
-    pipeline.generator.to(dtype=torch.bfloat16)
-    pipeline.vae.to(dtype=torch.bfloat16)
-    apply_preset(pipeline, memory, device)
-    if torch.cuda.is_available():
-        allocated = torch.cuda.memory_allocated() / (1024**3)
-        reserved = torch.cuda.memory_reserved() / (1024**3)
-        print(f"CMD: ready memory={memory.value} allocated={allocated:.2f}GiB reserved={reserved:.2f}GiB", flush=True)
-    else:
-        print(f"CMD: ready memory={memory.value} device={device}", flush=True)
+
+    print("CMD: official repo ready, loading CausalInferencePipeline", flush=True)
+    with torch.inference_mode():
+        with scoped_cmd_construction(search_root) as hf_guard:
+            from pipeline.causal_inference import CausalInferencePipeline
+
+            hf_guard.bind_cosmos()
+            if backend == "sdpa":
+                force_sdpa()
+                print("CMD: attention backend=sdpa", flush=True)
+            install_student_direct_load(ckpt)
+            print(f"CMD: constructing pipeline from {ckpt.name}", flush=True)
+            pipeline = CausalInferencePipeline(config, device=device)
+            install_capped_kv_cache(pipeline, preset.local_attn_size)
+        pipeline.text_encoder.to("cpu")
+        te_devices = {str(param.device) for param in pipeline.text_encoder.parameters()}
+        print(f"CMD: text encoder devices={sorted(te_devices)}", flush=True)
+        empty_cache()
+        print("CMD: loading student weights", flush=True)
+        load_generator_checkpoint(pipeline, ckpt)
+        pipeline.generator.to(dtype=torch.bfloat16)
+        pipeline.vae.to(dtype=torch.bfloat16)
+        apply_preset(pipeline, memory, device)
+        if torch.cuda.is_available():
+            allocated = torch.cuda.memory_allocated() / (1024**3)
+            reserved = torch.cuda.memory_reserved() / (1024**3)
+            print(
+                f"CMD: ready memory={memory.value} allocated={allocated:.2f}GiB "
+                f"reserved={reserved:.2f}GiB",
+                flush=True,
+            )
+        else:
+            print(f"CMD: ready memory={memory.value} device={device}", flush=True)
 
     return LoadedCMD(
         pipeline=pipeline,
