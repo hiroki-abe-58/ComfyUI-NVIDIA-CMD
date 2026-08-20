@@ -1,20 +1,17 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import Any
+
+import numpy as np
 
 from .camera import load_camera_npz, poses_from_w2c
-
-if TYPE_CHECKING:
-    import numpy as np
-    from PIL import Image
 from .loader import LoadedCMD
-from .memory import empty_cache, offload_text_encoder, prepare_vae
+from .memory import empty_cache, offload_text_encoder, preflight_or_raise, prepare_vae
 from .presets import FPS, PIXEL_HEIGHT, PIXEL_WIDTH, MemoryPreset
 
 
 def _prepare_image(image, height: int, width: int) -> Any:
-    import numpy as np
     import torch
     from PIL import Image
     from torchvision import transforms
@@ -47,7 +44,6 @@ def generate_video(
     num_output_frames: int | None = None,
 ) -> np.ndarray:
     """Return uint8 frames as [T, H, W, C]."""
-    import numpy as np
     import torch
 
     torch.set_grad_enabled(False)
@@ -65,6 +61,13 @@ def generate_video(
     frames = num_output_frames or loaded.preset.num_output_frames
     height = int(getattr(config, "height", PIXEL_HEIGHT))
     width = int(getattr(config, "width", PIXEL_WIDTH))
+    preflight_or_raise(
+        frames,
+        int(loaded.preset.local_attn_size),
+        height,
+        width,
+        getattr(config, "image_or_video_shape", None),
+    )
 
     image_tensor = _prepare_image(image, height, width).to(device=device, dtype=torch.bfloat16)
     prepare_vae(pipeline, device)

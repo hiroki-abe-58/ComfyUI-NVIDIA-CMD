@@ -8,8 +8,11 @@ Built on NVIDIA Cosmos
 
 ## 1. Status
 
-v0.1.0 adapter。MVP は `chunk1_short` + BF16 + SDPA + 832x480。  
-Windows 11 + RTX 5090 で `outputs/cmd_i2v.mp4`（93 frames, backend=sdpa）を確認済み。
+v0.2.0 adapter。BF16 + SDPA + 832x480。  
+Windows 11 + RTX 5090 + ComfyUI portable で 3 workflow の mp4 生成を確認済み。
+
+- standalone: `outputs/cmd_i2v.mp4`（93 frames, backend=sdpa）
+- ComfyUI: `outputs/comfyUI/cmd_i2v_basic.mp4` / `cmd_long_basic.mp4` / `cmd_camera_control.mp4`
 
 ## 2. What this is
 
@@ -43,9 +46,12 @@ git clone https://github.com/nv-tlabs/cmd.git third_party\cmd
 
 ```text
 <ComfyUI>/models/nvidia_cmd/
-  transformer/chunk1_short_t24_l21.safetensors
+  transformer/
+    chunk1_short_t24_l21.safetensors
+    chunk1_long_t126_l21.safetensors          # long workflow
+    chunk1_camera_control_t32_l21.safetensors # camera workflow
   text_encoder/          # nvidia/Cosmos-Reason1-7B
-  vae/tokenizer.pth      # nvidia/Cosmos-Predict2.5-2B
+  vae/tokenizer.pth      # または Wan2.1_VAE.pth
 ```
 
 ```powershell
@@ -66,18 +72,44 @@ hf download ali-vilab/VACE-Wan2.1-1.3B-Preview Wan2.1_VAE.pth --local-dir <Comfy
 
 - `NVIDIACMDModelLoader`
 - `NVIDIACMDImageToVideo`
-- `NVIDIACMDCameraControl`（camera checkpoint + NPZ）
+- `NVIDIACMDCameraControl`（camera checkpoint + NPZ。同梱は `examples/identity_camera.npz`）
 - `NVIDIACMDLongVideo`（`chunk1_long` / `chunk4_long`）
+- `NVIDIACMDSaveVideo`（16fps mp4。ComfyUI の `output/` へ保存）
 
 KSampler 互換にはしません。negative prompt / CFG は学生推論では使いません。
 
+long は公式 KV cache が全 latent を保持すると VRAM を溢して Windows が落ちます。adapter は `local_attn_size`（chunk1_long では 21）の環状バッファに制限します。
+
 ## 7. Workflows
 
-- `workflows/cmd_i2v_basic.json`
-- `workflows/cmd_camera_control.json`
-- `workflows/cmd_long_basic.json`
+clone 後はモデル配置と公式 repo の場所だけが追加作業です。  
+入力画像の実体は `outputs/comfyUI/sampleimage.png`（ComfyUI 上では `car-red.png` として読み込み）。
 
-clone 後はモデル配置と公式 repo の場所だけが追加作業です。
+入力画像:
+
+![CMD input image](outputs/comfyUI/sampleimage.png)
+
+### cmd_i2v_basic.json
+
+`chunk1_short` + `NVIDIACMDImageToVideo` + `NVIDIACMDSaveVideo`。  
+結果: [outputs/comfyUI/cmd_i2v_basic.mp4](outputs/comfyUI/cmd_i2v_basic.mp4)
+
+![cmd_i2v_basic ComfyUI](screenshots/cmd_i2v_basic.png)
+
+### cmd_long_basic.json
+
+`chunk1_long` + `NVIDIACMDLongVideo` + `NVIDIACMDSaveVideo`。  
+126 latent / 約 501 pixel frames / 16fps。RTX 5090 で peak allocated=23852MiB。  
+結果: [outputs/comfyUI/cmd_long_basic.mp4](outputs/comfyUI/cmd_long_basic.mp4)
+
+![cmd_long_basic ComfyUI](screenshots/cmd_long_basic.png)
+
+### cmd_camera_control.json
+
+`chunk1_camera` + `identity_camera.npz` + `NVIDIACMDImageToVideo`。  
+結果: [outputs/comfyUI/cmd_camera_control.mp4](outputs/comfyUI/cmd_camera_control.mp4)
+
+![cmd_camera_control ComfyUI](screenshots/cmd_camera_control.png)
 
 ## 8. Standalone (no ComfyUI UI)
 
@@ -97,7 +129,8 @@ BALANCED は text encode 後に Reason1 を外し、DiT で chunk 生成し、VA
 | --- | --- | --- | --- | --- |
 | idle | 584 | 32607 | RTX 5090 | nvidia-smi |
 | loaded | 4188 | 32607 | RTX 5090 | torch allocated, BALANCED |
-| peak | 22709 | 32607 | RTX 5090 | max_memory_allocated, 8-frame |
+| peak | 22709 | 32607 | RTX 5090 | max_memory_allocated, 8-frame probe |
+| long peak | 23852 | 32607 | RTX 5090 | ComfyUI `cmd_long_basic`, KV capped to 21 |
 | vae_decode | 22709 | 32607 | RTX 5090 | BALANCED では VAE を GPU に残す |
 | after | 610 | 32607 | RTX 5090 | プロセス終了後 |
 
@@ -121,6 +154,6 @@ public 化は、import / load / 5090 生成 / workflow / ライセンス確認�
 - `python -m pytest tests`
 - Phase 1: `scripts/standalone_i2v.py` が Traceback なしで動画を出す
 - Phase 2: `flash-attn` なし、ログが `backend=sdpa`
-- ComfyUI 起動で node import が落ちないこと
+- ComfyUI portable で 3 workflow が Queue 成功し、`outputs/comfyUI/` に mp4 が出ること
 
 一次情報の整理は `docs/upstream-inventory.md` にあります。

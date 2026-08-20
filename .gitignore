@@ -15,6 +15,12 @@ models/
 .pytest_cache/
 outputs/
 !outputs/cmd_i2v.mp4
+!outputs/comfyUI/
+!outputs/comfyUI/sampleimage.png
+!outputs/comfyUI/cmd_i2v_basic.mp4
+!outputs/comfyUI/cmd_long_basic.mp4
+!outputs/comfyUI/cmd_camera_control.mp4
+!examples/*.npz
 .cache/
 .hf/
 *.log

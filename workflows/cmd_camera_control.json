@@ -79,7 +79,7 @@
       "properties": {
         "Node name for S&R": "NVIDIACMDCameraControl"
       },
-      "widgets_values": ["examples/identity_camera.npz"]
+      "widgets_values": ["identity_camera.npz"]
     },
     {
       "id": 4,
@@ -125,24 +125,24 @@
     },
     {
       "id": 5,
-      "type": "PreviewImage",
+      "type": "NVIDIACMDSaveVideo",
       "pos": [940, 160],
-      "size": [320, 320],
+      "size": [360, 80],
       "flags": {},
       "order": 4,
       "mode": 0,
       "inputs": [
         {
-          "name": "images",
+          "name": "frames",
           "type": "IMAGE",
           "link": 4
         }
       ],
       "outputs": [],
       "properties": {
-        "Node name for S&R": "PreviewImage"
+        "Node name for S&R": "NVIDIACMDSaveVideo"
       },
-      "widgets_values": []
+      "widgets_values": ["cmd_camera"]
     }
   ],
   "links": [

@@ -10,6 +10,10 @@ def _existing_dir(path: Path) -> Path | None:
     return None
 
 
+def _is_comfy_root(path: Path) -> bool:
+    return (path / "main.py").is_file() and (path / "comfy").is_dir()
+
+
 def find_comfy_root() -> Path | None:
     env = os.environ.get("COMFYUI_ROOT")
     if env:
@@ -17,10 +21,22 @@ def find_comfy_root() -> Path | None:
         if found is not None:
             return found
 
-    here = Path(__file__).resolve()
-    for parent in here.parents:
-        if (parent / "main.py").is_file() and (parent / "comfy").is_dir():
-            return parent
+    try:
+        import folder_paths
+
+        base = getattr(folder_paths, "base_path", None)
+        if base:
+            found = _existing_dir(Path(base))
+            if found is not None and _is_comfy_root(found):
+                return found
+    except ImportError:
+        pass
+
+    # Junction 経由の custom_node では resolve() すると ComfyUI ルートを見失う。
+    for here in (Path(__file__), Path(__file__).resolve()):
+        for parent in here.parents:
+            if _is_comfy_root(parent):
+                return parent.resolve()
     return None
 
 
@@ -28,9 +44,15 @@ def default_model_root() -> Path:
     comfy = find_comfy_root()
     if comfy is not None:
         return comfy / "models" / "nvidia_cmd"
+
     env = os.environ.get("CMD_MODEL_ROOT")
     if env:
         return Path(env)
+
+    package_models = Path(__file__).resolve().parent.parent / "models" / "nvidia_cmd"
+    if package_models.is_dir():
+        return package_models
+
     return Path.cwd() / "models" / "nvidia_cmd"
 
 

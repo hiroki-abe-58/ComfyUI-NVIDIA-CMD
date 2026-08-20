@@ -24,10 +24,21 @@ BALANCED: Reason1 は CPU、DiT と VAE は GPU、`torch.set_grad_enabled(False)
 
 ## Phase 7–8
 
-`NVIDIACMDCameraControl` と `NVIDIACMDLongVideo`、workflow を追加。  
-camera / long の実生成は追加 checkpoint 未配置のため未実施。
+`NVIDIACMDCameraControl` と `NVIDIACMDLongVideo`、workflow を追加。
 
 ## Phase 9
 
 v0.1.0。NOTICE に Built on NVIDIA Cosmos を記載。  
 公式 CMD は NVIDIA OneWay Noncommercial のため、このリポジトリは public にしない。
+
+## ComfyUI portable (2026-08-20)
+
+`E:\ComfyUI\ComfyUI_windows_portable` で 3 workflow が Queue 成功。  
+入力画像は `outputs/comfyUI/sampleimage.png`（UI 上は `car-red.png`）。  
+画面は `screenshots/`、mp4 は `outputs/comfyUI/`。
+
+- `cmd_i2v_basic.json` / `chunk1_short` → `outputs/comfyUI/cmd_i2v_basic.mp4`
+- `cmd_long_basic.json` / `chunk1_long` → `outputs/comfyUI/cmd_long_basic.mp4`。peak allocated=23852MiB、約 267s。KV は `local_attn_size=21` に制限
+- `cmd_camera_control.json` / `chunk1_camera` + `identity_camera.npz` → `outputs/comfyUI/cmd_camera_control.mp4`
+
+`NVIDIACMDSaveVideo` が ComfyUI `output/` に 16fps mp4 を書く。

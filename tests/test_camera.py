@@ -9,7 +9,14 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from nvidia_cmd.camera import load_camera_npz
+from nvidia_cmd.camera import load_camera_npz, resolve_camera_path
+
+
+def test_resolve_camera_path_finds_examples(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    resolved = resolve_camera_path("identity_camera.npz")
+    assert resolved.is_file()
+    assert resolved.name == "identity_camera.npz"
 
 
 def test_load_camera_npz(tmp_path: Path):

@@ -272,7 +272,7 @@ def load_cmd_pipeline(
 
     from pipeline.causal_inference import CausalInferencePipeline
 
-    from .memory import apply_preset, empty_cache
+    from .memory import apply_preset, empty_cache, install_capped_kv_cache
 
     ckpt = Path(checkpoint_path) if checkpoint_path else None
     if ckpt is None:
@@ -293,6 +293,7 @@ def load_cmd_pipeline(
     install_student_direct_load(ckpt)
     print(f"CMD: constructing pipeline from {ckpt.name}", flush=True)
     pipeline = CausalInferencePipeline(config, device=device)
+    install_capped_kv_cache(pipeline, preset.local_attn_size)
     pipeline.text_encoder.to("cpu")
     te_devices = {str(param.device) for param in pipeline.text_encoder.parameters()}
     print(f"CMD: text encoder devices={sorted(te_devices)}", flush=True)

@@ -11,6 +11,7 @@ def test_basic_workflow_has_loader_and_i2v():
     types = {node["type"] for node in data["nodes"]}
     assert "NVIDIACMDModelLoader" in types
     assert "NVIDIACMDImageToVideo" in types
+    assert "NVIDIACMDSaveVideo" in types
 
 
 def test_camera_workflow_has_camera_node():
@@ -24,4 +25,5 @@ def test_long_workflow_uses_long_checkpoint():
     data = json.loads((ROOT / "workflows" / "cmd_long_basic.json").read_text(encoding="utf-8"))
     types = {node["type"] for node in data["nodes"]}
     assert "NVIDIACMDLongVideo" in types
+    assert "NVIDIACMDSaveVideo" in types
     assert data["nodes"][0]["widgets_values"][0] == "chunk1_long"

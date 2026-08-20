@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any
 
 try:
@@ -112,11 +111,11 @@ class NVIDIACMDCameraControl:
 
     def load(self, camera_npz: str):
         try:
-            from .nvidia_cmd.camera import load_camera_npz
+            from .nvidia_cmd.camera import load_camera_npz, resolve_camera_path
         except ImportError:
-            from nvidia_cmd.camera import load_camera_npz
+            from nvidia_cmd.camera import load_camera_npz, resolve_camera_path
 
-        path = Path(camera_npz)
+        path = resolve_camera_path(camera_npz)
         load_camera_npz(path)
         return ({"path": str(path.resolve())},)
 
@@ -139,11 +138,61 @@ class NVIDIACMDLongVideo:
         return NVIDIACMDImageToVideo().generate(cmd_model, image, prompt, seed, camera)
 
 
+class NVIDIACMDSaveVideo:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "frames": ("IMAGE",),
+                "filename_prefix": ("STRING", {"default": "cmd"}),
+            }
+        }
+
+    RETURN_TYPES = ()
+    FUNCTION = "save"
+    OUTPUT_NODE = True
+    CATEGORY = "NVIDIA/CMD"
+
+    def save(self, frames, filename_prefix: str = "cmd"):
+        from pathlib import Path
+
+        import numpy as np
+
+        try:
+            from .nvidia_cmd.pipeline import write_mp4
+            from .nvidia_cmd.presets import FPS
+        except ImportError:
+            from nvidia_cmd.pipeline import write_mp4
+            from nvidia_cmd.presets import FPS
+
+        try:
+            import folder_paths
+
+            output_dir = Path(folder_paths.get_output_directory())
+        except Exception:
+            output_dir = Path.cwd() / "output"
+
+        pixels = frames.detach().cpu().numpy()
+        if pixels.ndim != 4:
+            raise ValueError(f"Expected IMAGE batch [T,H,W,C], got {pixels.shape}")
+        uint8 = (pixels.clip(0, 1) * 255.0).astype(np.uint8)
+        prefix = filename_prefix.strip() or "cmd"
+        path = output_dir / f"{prefix}_{len(uint8):03d}f.mp4"
+        counter = 1
+        while path.exists():
+            path = output_dir / f"{prefix}_{len(uint8):03d}f_{counter:03d}.mp4"
+            counter += 1
+        written = write_mp4(uint8, path, fps=FPS)
+        print(f"CMD: wrote video {written} frames={len(uint8)} fps={FPS}", flush=True)
+        return {"ui": {"text": [str(written)]}}
+
+
 NODE_CLASS_MAPPINGS = {
     "NVIDIACMDModelLoader": NVIDIACMDModelLoader,
     "NVIDIACMDImageToVideo": NVIDIACMDImageToVideo,
     "NVIDIACMDCameraControl": NVIDIACMDCameraControl,
     "NVIDIACMDLongVideo": NVIDIACMDLongVideo,
+    "NVIDIACMDSaveVideo": NVIDIACMDSaveVideo,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -151,6 +200,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "NVIDIACMDImageToVideo": "NVIDIA CMD Image to Video",
     "NVIDIACMDCameraControl": "NVIDIA CMD Camera Control",
     "NVIDIACMDLongVideo": "NVIDIA CMD Long Video",
+    "NVIDIACMDSaveVideo": "NVIDIA CMD Save Video",
 }
 
 __all__ = [

@@ -103,24 +103,24 @@
     },
     {
       "id": 4,
-      "type": "PreviewImage",
+      "type": "NVIDIACMDSaveVideo",
       "pos": [960, 180],
-      "size": [320, 320],
+      "size": [360, 80],
       "flags": {},
       "order": 3,
       "mode": 0,
       "inputs": [
         {
-          "name": "images",
+          "name": "frames",
           "type": "IMAGE",
           "link": 3
         }
       ],
       "outputs": [],
       "properties": {
-        "Node name for S&R": "PreviewImage"
+        "Node name for S&R": "NVIDIACMDSaveVideo"
       },
-      "widgets_values": []
+      "widgets_values": ["cmd_i2v"]
     }
   ],
   "links": [

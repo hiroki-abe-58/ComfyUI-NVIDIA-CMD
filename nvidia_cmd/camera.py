@@ -6,10 +6,40 @@ from typing import Any
 import numpy as np
 
 
+def resolve_camera_path(camera_path: str | Path) -> Path:
+    candidate = Path(camera_path)
+    if candidate.is_file():
+        return candidate.resolve()
+
+    search: list[Path] = []
+    package_root = Path(__file__).resolve().parent.parent
+    if not candidate.is_absolute():
+        search.extend(
+            [
+                Path.cwd() / candidate,
+                package_root / candidate,
+                package_root / "examples" / candidate.name,
+            ]
+        )
+    search.append(package_root / "examples" / candidate.name)
+    try:
+        import folder_paths
+
+        input_dir = Path(folder_paths.get_input_directory())
+        search.append(input_dir / candidate.name)
+        search.append(input_dir / candidate)
+    except Exception:
+        pass
+
+    for item in search:
+        if item.is_file():
+            return item.resolve()
+    looked = ", ".join(str(item) for item in search)
+    raise FileNotFoundError(f"Camera NPZ not found: {camera_path}. Looked in: {looked}")
+
+
 def load_camera_npz(camera_path: str | Path) -> tuple[Any, Any]:
-    path = Path(camera_path)
-    if not path.is_file():
-        raise FileNotFoundError(f"Camera NPZ not found: {path}")
+    path = resolve_camera_path(camera_path)
     with np.load(path, allow_pickle=False) as camera:
         if "target_w2c" not in camera or "target_intrinsics" not in camera:
             raise ValueError(

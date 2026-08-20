@@ -8,10 +8,13 @@
 | --- | --- |
 | Import without model/CUDA build | pytest 10 passed |
 | Loader / I2V nodes exist | implemented |
-| Workflow `cmd_i2v_basic.json` | implemented |
+| Workflow `cmd_i2v_basic.json` | ComfyUI portable で mp4 成功 |
+| Workflow `cmd_long_basic.json` | ComfyUI portable で mp4 成功（KV cap、peak 23852MiB） |
+| Workflow `cmd_camera_control.json` | ComfyUI portable で mp4 成功 |
 | NOTICE / LICENSE / Built on NVIDIA Cosmos | present |
 | Official CMD license | NVIDIA OneWay Noncommercial (research/education only) |
 | RTX 5090 standalone mp4 | `outputs/cmd_i2v.mp4` 93 frames, backend=sdpa |
+| RTX 5090 ComfyUI mp4 | `outputs/comfyUI/` に 3 本 |
 | flash-attn not required | confirmed (`flash_attn` is None) |
 | README VRAM table | measured values only |
 
