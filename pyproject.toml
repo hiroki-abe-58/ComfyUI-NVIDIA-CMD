@@ -21,6 +21,10 @@ dependencies = [
     "pillow>=11.0.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/hiroki-abe-58/ComfyUI-NVIDIA-CMD"
+Repository = "https://github.com/hiroki-abe-58/ComfyUI-NVIDIA-CMD"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
