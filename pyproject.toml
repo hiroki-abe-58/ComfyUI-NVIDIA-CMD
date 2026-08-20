@@ -39,3 +39,7 @@ pythonpath = ["."]
 addopts = "--import-mode=importlib --ignore=__init__.py"
 python_files = ["test_*.py"]
 norecursedirs = [".venv", "third_party", "models", "outputs"]
+
+[tool.comfy]
+PublisherId = "hiroki-abe-58"
+DisplayName = "NVIDIA CMD for ComfyUI"

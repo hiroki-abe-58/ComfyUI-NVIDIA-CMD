@@ -1,0 +1,23 @@
+# Development and demo assets. Registry packs git-tracked files minus this list.
+docs/
+tests/
+screenshots/
+outputs/
+*.mp4
+.pytest_cache/
+.vscode/
+.github/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.cache/
+.hf/
+third_party/
+models/
+*.safetensors
+*.pt
+*.pth
+*.bin
+*.ckpt
