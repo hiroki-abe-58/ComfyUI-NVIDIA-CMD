@@ -2,7 +2,9 @@ ComfyUI-NVIDIA-CMD
 Copyright 2026 ComfyUI-NVIDIA-CMD contributors
 
 This repository contains original ComfyUI adapter code licensed under
-Apache License 2.0.
+Apache License 2.0 (see LICENSE). That license applies only to original
+files in this repository. Official NVIDIA CMD sources and checkpoints
+remain under their own licenses, listed below.
 
 It is designed to call, but not vendor, the official NVIDIA CMD
 implementation and checkpoints.
