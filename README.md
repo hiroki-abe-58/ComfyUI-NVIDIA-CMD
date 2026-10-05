@@ -8,7 +8,7 @@ No WSL. No `flash-attn` package. Attention is PyTorch SDPA.
 
 **This project is unofficial.** It is not published, endorsed, or supported by NVIDIA. It is an adapter that calls the official [nv-tlabs/cmd](https://github.com/nv-tlabs/cmd) checkout. Official CMD code and student weights are licensed under the **NVIDIA OneWay Noncommercial License** (research and education only). See [License](#license).
 
-Built on NVIDIA Cosmos. Version **0.2.0**.
+Built on NVIDIA Cosmos. Version **0.2.1**.
 
 ## Demo
 
@@ -73,6 +73,21 @@ This adapter uses the `transformers` package already present in the ComfyUI envi
 
 ## Install
 
+### Comfy Registry
+
+Published on the Comfy Registry as [`comfyui-nvidia-cmd`](https://registry.comfy.org/publishers/hiroki-abe-58/nodes/comfyui-nvidia-cmd).
+
+- ComfyUI-Manager: search for `NVIDIA CMD`, click **Install** on "NVIDIA CMD for ComfyUI", then restart ComfyUI
+- comfy-cli (installs into the selected workspace; check it with `comfy which`):
+
+```powershell
+comfy node install comfyui-nvidia-cmd
+```
+
+The Registry package contains the adapter only. Clone [nv-tlabs/cmd](https://github.com/nv-tlabs/cmd) separately and either place it at `third_party\cmd` inside the installed node folder or point `CMD_UPSTREAM` at it.
+
+### Manual install
+
 Clone into ComfyUI `custom_nodes` and install adapter dependencies only, with the same Python ComfyUI uses.
 
 ```powershell
@@ -82,6 +97,8 @@ cd ComfyUI-NVIDIA-CMD
 .\<ComfyUI-python> -m pip install -r requirements.txt
 git clone https://github.com/nv-tlabs/cmd.git third_party\cmd
 ```
+
+### Notes
 
 Do not install `flash-attn`, Transformer Engine, `natten`, or the official Triton stack for this node.
 
@@ -117,7 +134,7 @@ hf download ali-vilab/VACE-Wan2.1-1.3B-Preview Wan2.1_VAE.pth --local-dir <Comfy
 
 ## Workflows
 
-After clone, the extra work is model layout plus the official repo path. Load a JSON from `workflows/`.
+After install, the extra work is model layout plus the official repo path. Load a JSON from `workflows/`.
 
 ### cmd_i2v_basic.json
 
@@ -156,7 +173,7 @@ Record helper: `python scripts/record_vram.py --label idle`.
 
 ## Known issues
 
-- `ensure_official_cmd_on_path` still does `sys.path.insert(0)`, drops generic `sys.modules` names (`utils`, `pipeline`, `wan`, `inference`), and writes `__init__.py` into the official checkout. Full import isolation is not done in 0.2.0
+- `ensure_official_cmd_on_path` still does `sys.path.insert(0)`, drops generic `sys.modules` names (`utils`, `pipeline`, `wan`, `inference`), and writes `__init__.py` into the official checkout. Full import isolation is not done in this release
 - After a CMD load, cosmos / official CMD classes remain patched in that ComfyUI process
 - `TORCHDYNAMO_DISABLE` / `TORCH_COMPILE_DISABLE` are set only during construct and then restored; a later official re-import in the same process would compile again unless the loader runs
 - Linux, RTX 40-series, and non-portable ComfyUI builds are untested here
@@ -174,11 +191,10 @@ Using this adapter does not grant a commercial license to official CMD or Cosmos
 
 ## Roadmap
 
-After this public-ready 0.2.0 surface:
+After this public-ready release:
 
 - Narrower official-import isolation (no generic `sys.modules` wipes)
 - Measure Linux and RTX 40-series if hardware is available
-- Optional ComfyUI Registry listing (no publisher ID invented here)
 - chunk4 / FP8 / SageAttention only after a measured path exists
 
 ## Credits

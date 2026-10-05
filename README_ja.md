@@ -8,7 +8,7 @@ WSL 不要。`flash-attn` パッケージ不要。Attention は PyTorch SDPA で
 
 **このプロジェクトは非公式です。** NVIDIA の公開物でも、推奨でも、サポート対象でもありません。[nv-tlabs/cmd](https://github.com/nv-tlabs/cmd) の checkout を呼ぶ adapter です。公式 CMD コードと学生重みは **NVIDIA OneWay Noncommercial License**（研究・教育のみ）です。[ライセンス](#ライセンス) を読んでください。
 
-Built on NVIDIA Cosmos。バージョン **0.2.0**。
+Built on NVIDIA Cosmos。バージョン **0.2.1**。
 
 ## Demo
 
@@ -73,6 +73,21 @@ CMD は新しい単体アーキテクチャではありません。Cosmos-Predic
 
 ## インストール
 
+### Comfy Registry
+
+Comfy Registry に [`comfyui-nvidia-cmd`](https://registry.comfy.org/publishers/hiroki-abe-58/nodes/comfyui-nvidia-cmd) として公開しています。
+
+- ComfyUI-Manager: `NVIDIA CMD` で検索し、「NVIDIA CMD for ComfyUI」の **Install** を押して ComfyUI を再起動
+- comfy-cli（選択中の workspace に入る。`comfy which` で確認）:
+
+```powershell
+comfy node install comfyui-nvidia-cmd
+```
+
+Registry パッケージに入っているのは adapter だけです。[nv-tlabs/cmd](https://github.com/nv-tlabs/cmd) は別途 clone し、インストールされた node フォルダ内の `third_party\cmd` に置くか、`CMD_UPSTREAM` でその場所を指定してください。
+
+### 手動インストール
+
 ComfyUI の `custom_nodes` に clone し、ComfyUI と同じ Python で adapter 依存だけ入れます。
 
 ```powershell
@@ -83,12 +98,14 @@ cd ComfyUI-NVIDIA-CMD
 git clone https://github.com/nv-tlabs/cmd.git third_party\cmd
 ```
 
+### 共通の注意
+
 `flash-attn` / Transformer Engine / `natten` / 公式 Triton は入れません。
 
 環境変数:
 
 - `CMD_UPSTREAM`: 公式 `nv-tlabs/cmd` のルート
-- `CMD_MODEL_ROOT`: 上記 `nvidia_cmd` ディレクトリ
+- `CMD_MODEL_ROOT`: モデル用の `nvidia_cmd` ディレクトリ
 - `COMFYUI_ROOT`: ComfyUI ルート（任意）
 
 ## モデル配置
@@ -117,7 +134,7 @@ hf download ali-vilab/VACE-Wan2.1-1.3B-Preview Wan2.1_VAE.pth --local-dir <Comfy
 
 ## Workflows
 
-clone 後の追加作業は、モデル配置と公式 repo の場所だけです。`workflows/` の JSON を読み込みます。
+インストール後の追加作業は、モデル配置と公式 repo の場所だけです。`workflows/` の JSON を読み込みます。
 
 ### cmd_i2v_basic.json
 
@@ -156,7 +173,7 @@ BALANCED は text encode 後に Reason1 を外し、DiT で chunk 生成し、VA
 
 ## 既知の問題
 
-- `ensure_official_cmd_on_path` はまだ `sys.path.insert(0)`、汎用名（`utils` / `pipeline` / `wan` / `inference`）の `sys.modules` 削除、公式 checkout への `__init__.py` 書き込みを行う。0.2.0 では完全 isolation しない
+- `ensure_official_cmd_on_path` はまだ `sys.path.insert(0)`、汎用名（`utils` / `pipeline` / `wan` / `inference`）の `sys.modules` 削除、公式 checkout への `__init__.py` 書き込みを行う。このリリースでは完全 isolation しない
 - CMD ロード後、同一プロセス内の cosmos / 公式 CMD クラスは改変されたまま
 - `TORCHDYNAMO_DISABLE` / `TORCH_COMPILE_DISABLE` は構築中だけ立てて戻す。同一プロセスで公式モジュールを後から再 import すると、loader を通さない限り compile が再び走る
 - Linux / RTX 40 系 / Portable 以外の ComfyUI は未検証
@@ -174,11 +191,10 @@ BALANCED は text encode 後に Reason1 を外し、DiT で chunk 生成し、VA
 
 ## Roadmap
 
-公開可能な 0.2.0 の次:
+公開可能なこのリリースの次:
 
 - 公式 import の isolation を狭める（汎用 `sys.modules` 削除をやめる）
 - 機材があれば Linux / RTX 40 系の実測
-- ComfyUI Registry 掲載は任意（Publisher ID はここでは作らない）
 - chunk4 / FP8 / SageAttention は実測パスができてから
 
 ## Credits
