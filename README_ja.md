@@ -98,12 +98,14 @@ cd ComfyUI-NVIDIA-CMD
 git clone https://github.com/nv-tlabs/cmd.git third_party\cmd
 ```
 
+### 共通の注意
+
 `flash-attn` / Transformer Engine / `natten` / 公式 Triton は入れません。
 
 環境変数:
 
 - `CMD_UPSTREAM`: 公式 `nv-tlabs/cmd` のルート
-- `CMD_MODEL_ROOT`: 上記 `nvidia_cmd` ディレクトリ
+- `CMD_MODEL_ROOT`: モデル用の `nvidia_cmd` ディレクトリ
 - `COMFYUI_ROOT`: ComfyUI ルート（任意）
 
 ## モデル配置

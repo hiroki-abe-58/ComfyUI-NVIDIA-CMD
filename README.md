@@ -98,6 +98,8 @@ cd ComfyUI-NVIDIA-CMD
 git clone https://github.com/nv-tlabs/cmd.git third_party\cmd
 ```
 
+### Notes
+
 Do not install `flash-attn`, Transformer Engine, `natten`, or the official Triton stack for this node.
 
 Environment variables:
