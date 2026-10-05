@@ -73,6 +73,21 @@ CMD は新しい単体アーキテクチャではありません。Cosmos-Predic
 
 ## インストール
 
+### Comfy Registry
+
+Comfy Registry に [`comfyui-nvidia-cmd`](https://registry.comfy.org/publishers/hiroki-abe-58/nodes/comfyui-nvidia-cmd) として公開しています。
+
+- ComfyUI-Manager: `NVIDIA CMD` で検索し、「NVIDIA CMD for ComfyUI」の **Install** を押して ComfyUI を再起動
+- comfy-cli（選択中の workspace に入る。`comfy which` で確認）:
+
+```powershell
+comfy node install comfyui-nvidia-cmd
+```
+
+Registry パッケージに入っているのは adapter だけです。[nv-tlabs/cmd](https://github.com/nv-tlabs/cmd) は別途 clone し、インストールされた node フォルダ内の `third_party\cmd` に置くか、`CMD_UPSTREAM` でその場所を指定してください。
+
+### 手動インストール
+
 ComfyUI の `custom_nodes` に clone し、ComfyUI と同じ Python で adapter 依存だけ入れます。
 
 ```powershell
@@ -117,7 +132,7 @@ hf download ali-vilab/VACE-Wan2.1-1.3B-Preview Wan2.1_VAE.pth --local-dir <Comfy
 
 ## Workflows
 
-clone 後の追加作業は、モデル配置と公式 repo の場所だけです。`workflows/` の JSON を読み込みます。
+インストール後の追加作業は、モデル配置と公式 repo の場所だけです。`workflows/` の JSON を読み込みます。
 
 ### cmd_i2v_basic.json
 
@@ -178,7 +193,6 @@ BALANCED は text encode 後に Reason1 を外し、DiT で chunk 生成し、VA
 
 - 公式 import の isolation を狭める（汎用 `sys.modules` 削除をやめる）
 - 機材があれば Linux / RTX 40 系の実測
-- ComfyUI Registry 掲載は任意（Publisher ID はここでは作らない）
 - chunk4 / FP8 / SageAttention は実測パスができてから
 
 ## Credits

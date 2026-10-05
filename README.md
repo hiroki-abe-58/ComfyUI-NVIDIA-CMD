@@ -73,6 +73,21 @@ This adapter uses the `transformers` package already present in the ComfyUI envi
 
 ## Install
 
+### Comfy Registry
+
+Published on the Comfy Registry as [`comfyui-nvidia-cmd`](https://registry.comfy.org/publishers/hiroki-abe-58/nodes/comfyui-nvidia-cmd).
+
+- ComfyUI-Manager: search for `NVIDIA CMD`, click **Install** on "NVIDIA CMD for ComfyUI", then restart ComfyUI
+- comfy-cli (installs into the selected workspace; check it with `comfy which`):
+
+```powershell
+comfy node install comfyui-nvidia-cmd
+```
+
+The Registry package contains the adapter only. Clone [nv-tlabs/cmd](https://github.com/nv-tlabs/cmd) separately and either place it at `third_party\cmd` inside the installed node folder or point `CMD_UPSTREAM` at it.
+
+### Manual install
+
 Clone into ComfyUI `custom_nodes` and install adapter dependencies only, with the same Python ComfyUI uses.
 
 ```powershell
@@ -117,7 +132,7 @@ hf download ali-vilab/VACE-Wan2.1-1.3B-Preview Wan2.1_VAE.pth --local-dir <Comfy
 
 ## Workflows
 
-After clone, the extra work is model layout plus the official repo path. Load a JSON from `workflows/`.
+After install, the extra work is model layout plus the official repo path. Load a JSON from `workflows/`.
 
 ### cmd_i2v_basic.json
 
@@ -178,7 +193,6 @@ After this public-ready 0.2.0 surface:
 
 - Narrower official-import isolation (no generic `sys.modules` wipes)
 - Measure Linux and RTX 40-series if hardware is available
-- Optional ComfyUI Registry listing (no publisher ID invented here)
 - chunk4 / FP8 / SageAttention only after a measured path exists
 
 ## Credits
