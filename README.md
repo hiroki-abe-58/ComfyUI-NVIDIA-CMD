@@ -173,7 +173,7 @@ Record helper: `python scripts/record_vram.py --label idle`.
 
 ## Known issues
 
-- `ensure_official_cmd_on_path` still does `sys.path.insert(0)`, drops generic `sys.modules` names (`utils`, `pipeline`, `wan`, `inference`), and writes `__init__.py` into the official checkout. Full import isolation is not done in 0.2.1
+- `ensure_official_cmd_on_path` still does `sys.path.insert(0)`, drops generic `sys.modules` names (`utils`, `pipeline`, `wan`, `inference`), and writes `__init__.py` into the official checkout. Full import isolation is not done in this release
 - After a CMD load, cosmos / official CMD classes remain patched in that ComfyUI process
 - `TORCHDYNAMO_DISABLE` / `TORCH_COMPILE_DISABLE` are set only during construct and then restored; a later official re-import in the same process would compile again unless the loader runs
 - Linux, RTX 40-series, and non-portable ComfyUI builds are untested here
@@ -191,7 +191,7 @@ Using this adapter does not grant a commercial license to official CMD or Cosmos
 
 ## Roadmap
 
-After this public-ready 0.2.1 surface:
+After this public-ready release:
 
 - Narrower official-import isolation (no generic `sys.modules` wipes)
 - Measure Linux and RTX 40-series if hardware is available

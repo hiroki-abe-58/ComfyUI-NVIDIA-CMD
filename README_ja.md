@@ -173,7 +173,7 @@ BALANCED は text encode 後に Reason1 を外し、DiT で chunk 生成し、VA
 
 ## 既知の問題
 
-- `ensure_official_cmd_on_path` はまだ `sys.path.insert(0)`、汎用名（`utils` / `pipeline` / `wan` / `inference`）の `sys.modules` 削除、公式 checkout への `__init__.py` 書き込みを行う。0.2.1 では完全 isolation しない
+- `ensure_official_cmd_on_path` はまだ `sys.path.insert(0)`、汎用名（`utils` / `pipeline` / `wan` / `inference`）の `sys.modules` 削除、公式 checkout への `__init__.py` 書き込みを行う。このリリースでは完全 isolation しない
 - CMD ロード後、同一プロセス内の cosmos / 公式 CMD クラスは改変されたまま
 - `TORCHDYNAMO_DISABLE` / `TORCH_COMPILE_DISABLE` は構築中だけ立てて戻す。同一プロセスで公式モジュールを後から再 import すると、loader を通さない限り compile が再び走る
 - Linux / RTX 40 系 / Portable 以外の ComfyUI は未検証
@@ -191,7 +191,7 @@ BALANCED は text encode 後に Reason1 を外し、DiT で chunk 生成し、VA
 
 ## Roadmap
 
-公開可能な 0.2.1 の次:
+公開可能なこのリリースの次:
 
 - 公式 import の isolation を狭める（汎用 `sys.modules` 削除をやめる）
 - 機材があれば Linux / RTX 40 系の実測
